@@ -11,6 +11,7 @@ const ModuleRegistryProxy = artifacts.require('./ModuleRegistryProxy.sol');
 const ManualApprovalTransferManagerFactory = artifacts.require('./ManualApprovalTransferManagerFactory.sol')
 const CappedSTOFactory = artifacts.require('./CappedSTOFactory.sol')
 const USDTieredSTOFactory = artifacts.require('./USDTieredSTOFactory.sol')
+const USDTieredSTO = artifacts.require('./USDTieredSTO.sol')
 const SecurityTokenRegistry = artifacts.require('./SecurityTokenRegistry.sol')
 const SecurityTokenRegistryProxy = artifacts.require('./SecurityTokenRegistryProxy.sol')
 const FeatureRegistry = artifacts.require('./FeatureRegistry.sol')
@@ -293,6 +294,8 @@ module.exports = function (deployer, network, accounts) {
     return polymathRegistry.changeAddress("EthUsdOracle", ETHOracle, {from: PolymathAccount});
   }).then(() => {
     return deployer.deploy(SecurityToken, 'a', 'a', 18, 1, 'a', polymathRegistry.address, {from: PolymathAccount});
+  }).then(() => {
+    return deployer.deploy(USDTieredSTO, SecurityToken.address, SecurityToken.address, SecurityToken.address, {from: PolymathAccount});
   }).then(() => {
     console.log('\n');
     console.log(`
