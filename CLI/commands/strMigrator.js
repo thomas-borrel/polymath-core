@@ -333,6 +333,11 @@ async function step_launch_STs(tokens, securityTokenRegistry, tokenAddress) {
                         minNonce = minNonce + 1;
                         //totalGas = totalGas.add(new web3.utils.BN(modifyWhitelistReceipt.gasUsed));
                     }  
+
+                    let trueAllowAllWhitelistTransfersAction = gmt.methods.changeAllowAllWhitelistTransfers(true);
+                    let trueAllowAllWhitelistTransfersReceipt = await common.sendTransactionWithNonce(Issuer, trueAllowAllWhitelistTransfersAction, defaultGasPrice, minNonce);
+                    minNonce = minNonce + 1;
+
                     // Minting tokens
                     for (const mintedEvent of t.mintedEvents) {
                         let mintAction = newToken.methods.mint(mintedEvent.to, new web3.utils.BN(mintedEvent.amount));
@@ -340,6 +345,10 @@ async function step_launch_STs(tokens, securityTokenRegistry, tokenAddress) {
                         minNonce = minNonce + 1;
                         //totalGas = totalGas.add(new web3.utils.BN(mintReceipt.gasUsed));
                     }
+
+                    let falseAllowAllWhitelistTransfersAction = gmt.methods.changeAllowAllWhitelistTransfers(false);
+                    let falseAllowAllWhitelistTransfersReceipt = await common.sendTransactionWithNonce(Issuer, falseAllowAllWhitelistTransfersAction, defaultGasPrice, minNonce);
+                    minNonce = minNonce + 1;
                 }
                 
                 // Transferring onweship to the original owner
