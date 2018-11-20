@@ -334,8 +334,8 @@ async function step_launch_STs(tokens, securityTokenRegistry, tokenAddress) {
                         //totalGas = totalGas.add(new web3.utils.BN(modifyWhitelistReceipt.gasUsed));
                     }  
 
-                    let trueAllowAllWhitelistTransfersAction = gmt.methods.changeAllowAllWhitelistTransfers(true);
-                    let trueAllowAllWhitelistTransfersReceipt = await common.sendTransactionWithNonce(Issuer, trueAllowAllWhitelistTransfersAction, defaultGasPrice, minNonce);
+                    let trueAllowAllTransfersAction = gmt.methods.changeAllowAllTransfers(true);
+                    let trueAllowAllTransfersReceipt = await common.sendTransactionWithNonce(Issuer, trueAllowAllTransfersAction, defaultGasPrice, minNonce);
                     minNonce = minNonce + 1;
 
                     // Minting tokens
@@ -346,8 +346,8 @@ async function step_launch_STs(tokens, securityTokenRegistry, tokenAddress) {
                         //totalGas = totalGas.add(new web3.utils.BN(mintReceipt.gasUsed));
                     }
 
-                    let falseAllowAllWhitelistTransfersAction = gmt.methods.changeAllowAllWhitelistTransfers(false);
-                    let falseAllowAllWhitelistTransfersReceipt = await common.sendTransactionWithNonce(Issuer, falseAllowAllWhitelistTransfersAction, defaultGasPrice, minNonce);
+                    let falseAllowAllTransfersAction = gmt.methods.changeAllowAllTransfers(false);
+                    let falseAllowAllTransfersReceipt = await common.sendTransactionWithNonce(Issuer, falseAllowAllTransfersAction, defaultGasPrice, minNonce);
                     minNonce = minNonce + 1;
                 }
                 
