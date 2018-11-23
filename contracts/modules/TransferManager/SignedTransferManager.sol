@@ -12,18 +12,16 @@ contract SignedTransferManager is ITransferManager {
     bytes32 constant public ADMIN = "ADMIN";
 
     //Keeps track of if the signature has been used or invalidated
-    mapping(bytes => bool) invalidSignatures;
+    mapping (bytes => bool) invalidSignatures;
 
-    //keep tracks of the address that allows to sign messages
-    mapping(address => bool) public signers;
-
+    //Keeps track of the address that allows to sign messages
+    mapping (address => bool) public signers;
 
     // Emit when signer stats was changed
     event UpdateSigners(address[] _signers, bool[] _signersStats);
 
     // Emit when a signature has been deemed invalid
     event InvalidSignature(bytes _data);
-
 
     /**
      * @notice Constructor
@@ -59,11 +57,11 @@ contract SignedTransferManager is ITransferManager {
     function updateSigners(address[] _signers, bool[] _signersStats) public withPerm(ADMIN) {
         require(_signers.length == _signersStats.length, "input array length does not match");
         for(uint256 i=0; i<_signers.length; i++){
-            signers[_signers[i]] = _signersStats[i]; 
+            signers[_signers[i]] = _signersStats[i];
         }
         emit UpdateSigners(_signers, _signersStats);
     }
-
+    event Log(address _module, uint256 _nonce, bytes _sig);
     /**
     * @notice allow verify transfer with signature
     * @param _from address transfer from
@@ -75,31 +73,53 @@ contract SignedTransferManager is ITransferManager {
     * Signer needs to be in the signers mapping
     */
     function verifyTransfer(address _from, address _to, uint256 _amount, bytes _data , bool _isTransfer) public returns(Result) {
-        if (!paused) {
+        require (_isTransfer == false || msg.sender == securityToken, "Sender is not the owner");
 
-            require (_isTransfer == false || msg.sender == securityToken, "Sender is not the owner");
+        if ((!paused) && (_data.length != 0)) {
 
-            // not using require to avoid revert in this function
+            /* bytes sig;
+            address thisModule;
+            uint256 nonce; */
+            (address thisModule, uint256 nonce, bytes memory sig) = parseData(_data);
+            emit Log(thisModule, nonce, sig);
 
-            if(_data.length == 0){
-                return Result.INVALID;  // data input check
+            if (invalidSignatures[sig]) {
+                return Result.NA;
             }
-            
-            require(invalidSignatures[_data] != true, "Invalid signature - signature is either used or deemed as invalid");
+
             bytes32 hash = keccak256(abi.encodePacked(this, _from, _to, _amount));
             bytes32 prependedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
-            address signer = _recoverSignerAdd(prependedHash, _data);
+            address signer = _recoverSignerAddress(prependedHash, sig);
 
             if (signers[signer] != true){
                 return Result.NA;
-            } else if(_isTransfer == true) {
-                invalidSignatures[_data] = true;
-                return Result.VALID;
-            } else {
-                return Result.VALID;
             }
+
+            if(_isTransfer == true) {
+                invalidSignatures[sig] = true;
+            }
+
+            return Result.VALID;
         }
+
         return Result.NA;
+    }
+
+    function parseData(bytes _data) public returns (address, uint256, bytes) {
+        //Check that the signature is valid
+        require(_data.length >= 32, "Data input length is invalid");
+
+        address moduleAddress;
+        uint256 nonce;
+        bytes memory data = new bytes(_data.length - 64);
+
+        assembly {
+            moduleAddress := mload(add(_data, 32))
+            nonce := mload(add(_data, 64))
+            data := mload(add(_data, 68))
+        }
+
+        return (moduleAddress, nonce, data);
     }
 
     /**
@@ -119,7 +139,7 @@ contract SignedTransferManager is ITransferManager {
         bytes32 prependedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
 
         // return signer;
-        require(_recoverSignerAdd(prependedHash,_data) == msg.sender, "Incorrect Signer for this signature");
+        require(_recoverSignerAddress(prependedHash,_data) == msg.sender, "Incorrect Signer for this signature");
 
         invalidSignatures[_data] = true;
         emit InvalidSignature(_data);
@@ -128,10 +148,10 @@ contract SignedTransferManager is ITransferManager {
     /**
      * @notice used to recover signers' add from signature
      */
-    function _recoverSignerAdd(bytes32 _hash, bytes _data) internal view returns(address) {
-        
+    function _recoverSignerAddress(bytes32 _hash, bytes _data) internal pure returns(address) {
+
         //Check that the signature is valid
-        require(_data.length == 65, "Date input length is invalid");
+        require(_data.length == 65, "Sig input length is invalid");
 
         bytes32 r;
         bytes32 s;
@@ -152,7 +172,7 @@ contract SignedTransferManager is ITransferManager {
         return ecrecover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", _hash)), v, r, s);
     }
 
-   
+
     /**
      * @notice Return the permissions flag that are associated with ManualApproval transfer manager
      */

@@ -127,7 +127,7 @@ contract("SignedTransferManager", accounts => {
         FeatureRegistry:                   ${I_FeatureRegistry.address}
 
         ManualApprovalTransferManagerFactory: ${I_SignedTransferManagerFactory.address}
-        
+
 
         -----------------------------------------------------------------------------
         `);
@@ -231,11 +231,12 @@ contract("SignedTransferManager", accounts => {
                 account_investor1,
                 account_investor2,
                 web3.utils.toWei("2", "ether"),
-                token_owner
+                token_owner,
+                1
             );
 
             console.log("token owner is "+ token_owner);
-
+            console.log(sig);
             await I_SignedTransferManager.invalidSignature(account_investor1, account_investor2, web3.utils.toWei("2", "ether"), sig, {from: token_owner});
             assert.equal(await I_SignedTransferManager.checkSignatureIsInvalid(sig), true);
         });
@@ -255,7 +256,7 @@ contract("SignedTransferManager", accounts => {
             // let tx = await I_SignedTransferManager.verifyTransfer(account_investor1, account_investor2, web3.utils.toWei("1", "ether"), sig, false, {from: token_owner});
             console.log("owner token balance is " + (await I_SecurityToken.balanceOf(account_investor1)).toNumber());
             console.log("is this sig invalid?"+ await I_SignedTransferManager.checkSignatureIsInvalid(sig));
-            
+
             // test call security token transfer function
             let tx = await I_SecurityToken.transferWithData(account_investor2, web3.utils.toWei("1", "ether"), sig, {from: account_investor1});
             console.log("3");
@@ -270,9 +271,9 @@ contract("SignedTransferManager", accounts => {
                  web3.utils.toWei("1", "ether"),
                  token_owner
              );
- 
+
              console.log("2");
- 
+
              await catchRevert (I_SignedTransferManager.verifyTransfer(account_investor1, account_investor2, web3.utils.toWei("1", "ether"), sig, false, {from: token_owner}));
         });
 
@@ -287,9 +288,8 @@ contract("SignedTransferManager", accounts => {
 
             let tx = await I_SignedTransferManager.verifyTransfer.call(account_investor1, account_investor2, web3.utils.toWei("1", "ether"), sig, false, {from: token_owner});
             console.log("output is "+tx.toNumber());
-           
+
         });
 
     });
 });
-
