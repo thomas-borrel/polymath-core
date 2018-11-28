@@ -216,6 +216,7 @@ contract GeneralTransferManager is GeneralTransferManagerStorage, ITransferManag
             investors.push(_investor);
         }
         whitelist[_investor] = TimeRestriction(_fromTime, _toTime, _expiryTime, _canBuyFromSTO, uint8(1));
+        emit ModifyWhitelist(_investor, now, msg.sender, uint256(_fromTime), uint256(_toTime), uint256(_expiryTime), true);
     }
 
     /**
@@ -246,7 +247,7 @@ contract GeneralTransferManager is GeneralTransferManagerStorage, ITransferManag
             }
             _modifyWhitelist(_investors[i], uint64(_fromTimes[i]), uint64(_toTimes[i]), uint64(_expiryTimes[i]), canBuyFromSTO);
             /*solium-disable-next-line security/no-block-members*/
-            emit ModifyWhitelist(_investors[i], now, msg.sender, _fromTimes[i], _toTimes[i], _expiryTimes[i], _canBuyFromSTO[i]);
+            
         }
     }
 
