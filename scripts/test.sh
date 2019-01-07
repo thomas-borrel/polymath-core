@@ -94,8 +94,8 @@ if [ "$TRAVIS" = true ]; then
   mv truffle-ci.js truffle-config.js
   curl -L -o solidity-ubuntu-trusty.zip https://github.com/ethereum/solidity/releases/download/v0.4.24/solidity-ubuntu-trusty.zip
   unzip solidity-ubuntu-trusty.zip
-  mv solc /usr/bin/solc
-  mv lllc /usr/bin/lllc
+  sudo mv solc /usr/bin/solc
+  sudo mv lllc /usr/bin/lllc
   truffle version
 fi
 
